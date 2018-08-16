@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import static org.launchcode.models.JobData.findByColumnAndValue;
+
 /**
  * Created by LaunchCode
  */
@@ -24,21 +26,20 @@ public class SearchController {
     }
 
     // TODO #1 - Create handler to process search request and display results
-    @RequestMapping(
-            value = {"results"},
-            method = {RequestMethod.GET}
-    )
-    public String search(Model model, @RequestParam String searchType, @RequestParam String searchTerm) {
-        ArrayList jobsbyval;
+    @RequestMapping(value = "results")
+    public String search(Model model, String searchType, String searchTerm) {
+        model.addAttribute("columns", ListController.columnChoices);
+
         if (searchType.equals("all")) {
-            jobsbyval = JobData.findAll();
-            model.addAttribute("title", "All Jobs");
-            model.addAttribute("jobs", jobsbyval);
-            return "list-jobs";
+            ArrayList<HashMap<String, String>> searchResults = JobData.findByValue(searchTerm);
+            model.addAttribute("searchResults", searchResults);
+            return "search";
         } else {
-            model.addAttribute("columns", ListController.columnChoices);
-            jobsbyval = JobData.findByValue(searchTerm);
-            model.addAttribute("jobs", jobsbyval);
+            ArrayList<HashMap<String, String>> searchResults = findByColumnAndValue(searchType, searchTerm);
+
+            //This line allows the html template to use the variable
+            model.addAttribute("searchResults", searchResults);
+
             return "search";
         }
     }
